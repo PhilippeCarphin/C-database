@@ -174,7 +174,7 @@ int del_rcd(DBFILE f)
 int curr_rcd(DBFILE f, int k, void *bf)
 {
    RPTR ad;
-   if((ad == currkey(treeno(f,k))) == 0){
+   if((ad = currkey(treeno(f,k))) == 0){
       errno = D_NF;
       return ERROR;
    }
@@ -190,7 +190,7 @@ int seqrcd(DBFILE f, void *bf)
    int rtn;
 
    do{
-      ad == ++curr_a[f];
+      ad = ++curr_a[f];
       if((rtn = (rel_rcd(f, ad, bf)))==ERROR && errno!=D_NF)
          break;
    } while(errno == D_NF);
