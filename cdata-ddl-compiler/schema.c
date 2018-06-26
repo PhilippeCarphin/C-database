@@ -137,9 +137,9 @@ void main(int argc, char *argv[])
       }
       get_line();
       while(strncmp(ln, "#end schema", 11)){
-         if(strncmp(ln, "dictionary", 11) == 0)
+         if(strncmp(ln, "#dictionary", 11) == 0)
             de_dict();
-         else if (strncmp(ln, "file ", 6) == 0)
+         else if (strncmp(ln, "#file ", 6) == 0)
             files();
          else if (strncmp(ln, "#key ", 5) == 0)
             keys();
