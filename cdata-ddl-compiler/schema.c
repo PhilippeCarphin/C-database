@@ -337,11 +337,11 @@ static void defout(const char *fname)
    /* --- write the record structures --- */
    for(f = 0; f < fctr; f++){
       lcase(name, filenames[f]);
-      fprintf(fp, "\n struct %s {", name);
+      fprintf(fp, "\nstruct %s {", name);
       el = 0;
       while((fel = fileele[f][el++]) != 0){
          lcase(name, dc[fel-1].dename);
-         fprintf(fp, "\n\tchar %s [%d];",
+         fprintf(fp, "\n\tchar %s[%d];",
                   name, dc[fel-1].delen + 1);
       }
       fprintf(fp, "\n;\n");
@@ -368,7 +368,7 @@ static void schout(const char *fname)
    fprintf(fp, "\nconst char *denames[] = {");
    for(el = 0; el < dectr; el++)
       fprintf(fp, "\n\t\"%s\",", dc[el].dename);
-   fprintf(fp, "\n\tNULL\n};");
+   fprintf(fp, "\n\tNULL\n};\n");
    /* ------- data element types ---- */
    fprintf(fp, "\nconst char eltype[] = \"");
    for (el = 0; el < dectr; el++)
