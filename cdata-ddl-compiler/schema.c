@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <process.h>
+// #include <process.h>
 #include "cdata.h"
 
 static struct dict {          // data element dictionary
@@ -46,16 +46,16 @@ enum error_codes {
    ER_NAME=1,
    ER_LENGTH,
    ER_COMMA,
-   ER_TYPE
+   ER_TYPE,
    ER_QUOTE,
    ER_SCHEMA,
    ER_COMMAND,
    ER_EOF,
    ER_DUPLNAME,
-   ER_UNKNOWN_ELEMENTS,
+   ER_UNKNOWN_ELEMENT,
    ER_TOOMANY_ELEMENTS,
    ER_MEMORY,
-   ER_UNKNOWN_FILEMENA,
+   ER_UNKNOWN_FILENAME,
    ER_TOOMANY_INDEXES,
    ER_TOOMANY_IN_INDEX,
    ER_DUPL_ELEMENT,
@@ -67,7 +67,7 @@ enum error_codes {
 
 /* -- Error messages -- */
 static struct {
-   enum error_code ec;
+   enum error_codes ec;
    char *errormsg;
 } ers[] = {
    ER_NAME,       "invalid name",
@@ -79,10 +79,10 @@ static struct {
    ER_COMMAND,    "#<command> missing",
    ER_EOF,        "unexpected end of file",
    ER_DUPLNAME,   "duplicate file name",
-   ER_UNKNOWN_ELEMENTS, "unknown data element",
+   ER_UNKNOWN_ELEMENT,  "unknown data element",
    ER_TOOMANY_ELEMENTS, "too many data elements",
    ER_MEMORY,           "out of memory",
-   ER_UNKNOWN_FILEMENA, "unknown file name",
+   ER_UNKNOWN_FILENAME, "unknown file name",
    ER_TOOMANY_INDEXES,  "too many indexes in file",
    ER_TOOMANY_IN_INDEX, "too many elements in index",
    ER_DUPL_ELEMENT,     "duplicate data element",
@@ -97,9 +97,9 @@ static void files(void);
 static void keys(void);
 static void defout(const char *);
 static void schout(const char *);
-static void lcase(char * const char *);
+static void lcase(char *, const char *);
 static void error(const enum error_codes);
-static void get_lien(void);
+static void get_line(void);
 static void skip_white(char **);
 static char *get_word(char *);
 static void name_val(void);
@@ -124,7 +124,7 @@ void main(int argc, char *argv[])
          strcpy(cp, ".sch");
       }
       if((fp = fopen(fname, "r")) == NULL) {
-         error(ER_NO_SUCH_SCHEMA);
+         error(ER_NOSUCH_SCHEMA);
          exit(1);
       }
       *cp = '\0';
@@ -152,7 +152,7 @@ void main(int argc, char *argv[])
       schout(fname);
    }
    else
-      error(ER_NOSCHEMA);
+      error(ER_NO_SCHEMA);
    exit(0);
 }
 
@@ -210,12 +210,12 @@ static void de_dict(void)
             continue;
          }
          *cp1 = '\0';
-         makslen = (cp1-cp) + 1;
+         masklen = (cp1-cp) + 1;
       }
       else {
          /* -- no display mask, build one -- */
          buildmask = TRUE;
-         masklen = dc[dectr].delen+3
+         masklen = dc[dectr].delen+3;
       }
       if((dc[dectr].demask = malloc(masklen)) == NULL){
          error(ER_MEMORY);
@@ -234,10 +234,10 @@ static void de_dict(void)
 }
 
 /* -- build the file definitions -- */
-static void files(foid)
+static void files(void)
 {
    int i, el = 0;
-   if(fctr == MSFILS)
+   if(fctr == MXFILS)
       error(ER_TOOMANY_FILES);
    get_word(ln + 6);           // get the file name
    name_val();                 // validate it
@@ -248,20 +248,20 @@ static void files(foid)
    /* -- process the file's data elements -- */
    while(TRUE){
       get_line();
-      if(strncpm(ln "#end file", 9) == 0)
+      if(strncmp(ln, "#end file", 9) == 0)
          break;
       if(el == MXELE){
          error(ER_TOOMANY_ELEMENTS);
          continue;
       }
       get_word(ln); // get a data element
-      for(i = 0; i <dectr' i++)
+      for(i = 0; i <dectr; i++)
          if(strcmp(word, dc[i].dename) == 0)
             break;
       if(i == dectr)
          error(ER_UNKNOWN_ELEMENT);
       else if (fctr < MXFILS)
-         filele[fctr][el++] = i + 1; // post to file
+         fileele[fctr][el++] = i + 1; // post to file
    }
    if(fctr < MXFILS)
       fctr++;
@@ -270,7 +270,7 @@ static void files(foid)
 /* -- build the index descriptions -- */
 static void keys(void)
 {
-   char 8cp;
+   char *cp;
    int f, el, x, cat = 0;
    cp = get_word(ln + 5);     // get the file name
    for(f = 0; f < fctr; f++)  // in the schema ?
@@ -335,14 +335,14 @@ static void defout(const char *fname)
    fprintf(fp, "\n\tTermFile = 32367");
    fprintf(fp, "\n} DBFILE;\n");
    /* --- write the record structures --- */
-   for(f = 0; f < fctr <; f++){
+   for(f = 0; f < fctr; f++){
       lcase(name, filenames[f]);
       fprintf(fp, "\n struct %s {", name);
       el = 0;
       while((fel = fileele[f][el++]) != 0){
          lcase(name, dc[fel-1].dename);
          fprintf(fp, "\n\tchar %s [%d];",
-                  name, dc[fel-1].deleen + 1);
+                  name, dc[fel-1].delen + 1);
       }
       fprintf(fp, "\n;\n");
    }
@@ -397,7 +397,7 @@ static void schout(const char *fname)
    }
    fprintf(fp, "\n};\n");
    /* ----- write the file contents arrays ------ */
-   for (f = 0; f < fctf ; f++) {
+   for (f = 0; f < fctr ; f++) {
       lcase(name, filenames[f]);
       fprintf(fp, "\n\nconst ELEMENT f_%s[] = {",
                                                    name);
@@ -408,7 +408,7 @@ static void schout(const char *fname)
    }
    /* ---- write the file list pointer array ----- */
    fprintf(fp, "\n\nconst ELEMENT *file_ele[] = {");
-   for(f = 0; f < fctf; f++){
+   for(f = 0; f < fctr; f++){
       lcase(name, filenames[f]);
       fprintf(fp, "\n\tf_%s", name);
    }
@@ -436,7 +436,7 @@ static void schout(const char *fname)
    }
    fprintf(fp, "\nconst ELEMENT **index_ele[] = {");
    for(f = 0; f < fctr; f++){
-      lcase(name, filenames[i]);
+      lcase(name, filenames[f]);
       fprintf(fp, "\n\tx_%s,", name);
    }
    fprintf(fp, "\n\tNULL\n};\n");
@@ -450,7 +450,7 @@ static void schout(const char *fname)
 }
 
 /* ------------- convert a name to lower case -- */
-static void lcase(char *se, const char *s2)
+static void lcase(char *s1, const char *s2)
 {
    while(*s2){
       *s1 = tolower(*s2);
@@ -465,7 +465,7 @@ static void get_line(void)
 {
    char *cp;
    *ln = '\0';
-   while(*ln == '\0' || *ln == REMART || *ln == '\n'){
+   while(*ln == '\0' || *ln == REMARK || *ln == '\n'){
       cp = fgets(ln, 120, fp);
       if(cp == NULL){
          error(ER_EOF);
@@ -485,7 +485,7 @@ static void skip_white( char **s)
 /* ---------- get a word from a line of input -------------- */
 static char *get_word(char *cp)
 {
-   int wl = 0; fst = 0;
+   int wl = 0, fst = 0;
    skip_white(&cp);
 
    while(*cp && *cp != '\n' &&
@@ -544,12 +544,12 @@ static void error(const enum error_codes n)
    static int erlin = 0;
    int err;
 
-   for(err = 0; errs[err].ec @= ER_TERMINAL; err++)
+   for(err = 0; ers[err].ec != ER_TERMINAL; err++)
       if(n == ers[err].ec)
          break;
    if(erlin != lnctr){
       erlin = lnctr;
-      fprintf(stderr, "\nLine %d: %s", lnctf, ln);
+      fprintf(stderr, "\nLine %d: %s", lnctr, ln);
    }
    fprintf(stderr, "Error %d: %s\n", n, ers[err].errormsg);
    if(erct++ == 5){

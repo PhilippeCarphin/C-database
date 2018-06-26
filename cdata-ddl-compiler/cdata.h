@@ -42,11 +42,11 @@ extern const ELEMENT **index_ele[]; // index data elements
 /* -- Data base prototypes -- */
 
 /* -- Cdata API functions -- */
-void db_open(const char * const DBFILE *);
+void db_open(const char *, const DBFILE *);
 int add_rcd(DBFILE, void *);
 int find_rcd(DBFILE, int, char *, void *);
-int veryfy_rcd(DBFILE, int char *);
-int first_rcd(DBFILE, int void *);
+int veryfy_rcd(DBFILE, int, char *);
+int first_rcd(DBFILE, int, void *);
 int last_rcd(DBFILE, int, void *);
 int next_rcd(DBFILE, int, void *);
 int prev_rcd(DBFILE, int, void *);
@@ -58,7 +58,7 @@ void db_cls(void);
 void dberror(void);
 int rlen(DBFILE);
 void init_rcd(DBFILE, void *);
-void clrrcd(void * const ELEMENT *);
+void clrrcd(void *, const ELEMENT *);
 int epos(ELEMENT, const ELEMENT *);
 void rcd_fill(const void *, void *, const ELEMENT *,
                                            const ELEMENT *);
