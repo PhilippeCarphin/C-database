@@ -376,7 +376,7 @@ static void schout(const char *fname)
    fprintf(fp, "\";\n");
    /* ------ data element display masks ------- */
    fprintf(fp, "\nconst char *elmask[] = {");
-   for(el = 0; el < dectr; el++);\
+   for(el = 0; el < dectr; el++)
       fprintf( fp, (el < dectr - 1
                      ? "\n\t%s,"
                      : "\n\t%s"), dc[el].demask);
