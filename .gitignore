@@ -2,3 +2,4 @@ cbs.h
 cbs.c
 *.o
 *.out
+dbms/cdata.h
